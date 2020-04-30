@@ -1,8 +1,10 @@
 package com.vicente.cadastro.controller;
 
+import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.springframework.beans.BeanUtils;
@@ -17,9 +19,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.vicente.cadastro.model.Funcionario;
 import com.vicente.cadastro.repository.FuncionarioRepository;
@@ -48,22 +50,31 @@ public class FuncionarioController {
 		
 		return ResponseEntity.ok(funcionario.get());
 	}
-	
-	@PostMapping
-	@ResponseStatus(HttpStatus.CREATED)
-	public Funcionario adicionar(@Valid @RequestBody Funcionario funcionario) {
 		
+	@PostMapping
+	public ResponseEntity<Funcionario> adicionar(@Valid @RequestBody Funcionario funcionario,
+			HttpServletResponse  response) {
+		
+		//Verificar se ja existe no BD
 		Optional<Funcionario> oportunidadeExistente = funcionarios
 				.findByNome(funcionario.getNome());
 		
+		//Tratamneto do retorno da exception
 		if (oportunidadeExistente.isPresent()) {
 			
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-					"funcionario ja existente na base de dados");
+					"funcionario ja existente na base de dados"); 
+			//TODO Criar um novo arquivo para por as menssagens
 		}
 		
-		return funcionarios.save(funcionario);
-	}
+		//Adicionando no retorno o caminho para encontrar o funcionario adicionado 
+		Funcionario funcSalvo = funcionarios.save(funcionario);
+		URI uri = ServletUriComponentsBuilder.fromCurrentRequestUri().path("/{id}")
+				.buildAndExpand(funcSalvo.getId()).toUri();
+				
+		return ResponseEntity.created(uri).body(funcSalvo);
+		
+	} // adicionar
 	
 	
 	@PutMapping("/{id}")
