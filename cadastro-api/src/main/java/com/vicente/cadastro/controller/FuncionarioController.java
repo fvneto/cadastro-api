@@ -42,32 +42,28 @@ public class FuncionarioController {
 	@GetMapping("/{id}")
 	public ResponseEntity<Funcionario> buscar(@PathVariable Long id) {
 		
-		Optional<Funcionario> funcionario = funcionarios.findById(id);
-		
-		if (!funcionario.isPresent()) {
-			return ResponseEntity.notFound().build();
-		}
-		
-		return ResponseEntity.ok(funcionario.get());
-	}
-		
+	  return this.funcionarios.findById(id)
+	      .map(funcionario -> ResponseEntity.ok(funcionario))
+	      .orElse(ResponseEntity.notFound().build());
+			
+	} // buscar
+	
 	@PostMapping
 	public ResponseEntity<Funcionario> adicionar(@Valid @RequestBody Funcionario funcionario,
 			HttpServletResponse  response) {
 		
 		//Verificar se ja existe no BD
-		Optional<Funcionario> oportunidadeExistente = funcionarios
+		Optional<Funcionario> funcionarioExistente = funcionarios
 				.findByNome(funcionario.getNome());
 		
 		//Tratamneto do retorno da exception
-		if (oportunidadeExistente.isPresent()) {
+		if (funcionarioExistente.isPresent()) {
 			
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
 					"funcionario ja existente na base de dados"); 
-			//TODO Criar um novo arquivo para por as menssagens
 		}
 		
-		//Adicionando no retorno o caminho para encontrar o funcionario adicionado 
+		//Adicionando no retorno o path juntamente com o id 
 		Funcionario funcSalvo = funcionarios.save(funcionario);
 		URI uri = ServletUriComponentsBuilder.fromCurrentRequestUri().path("/{id}")
 				.buildAndExpand(funcSalvo.getId()).toUri();
@@ -75,7 +71,6 @@ public class FuncionarioController {
 		return ResponseEntity.created(uri).body(funcSalvo);
 		
 	} // adicionar
-	
 	
 	@PutMapping("/{id}")
 	public ResponseEntity<Funcionario> atualizar(@PathVariable Long id, 

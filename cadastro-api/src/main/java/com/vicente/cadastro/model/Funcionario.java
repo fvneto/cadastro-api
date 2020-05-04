@@ -10,6 +10,8 @@ import javax.persistence.Id;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
 
+import org.springframework.lang.NonNull;
+
 @Entity
 public class Funcionario {
 	
@@ -28,6 +30,7 @@ public class Funcionario {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	
+	@NonNull
 	@NotEmpty
 	@Size(max = 80)
 	@Column(name = "nome_funcionario")
@@ -42,7 +45,7 @@ public class Funcionario {
 	private BigDecimal salario;
 	
 	public Funcionario(@NotEmpty @Size(max = 80) String nome, @NotEmpty @Size(max = 80) String funcao,
-			BigDecimal salario) {
+			 BigDecimal salario) {
 		super();
 		this.nome = nome;
 		this.funcao = funcao;
