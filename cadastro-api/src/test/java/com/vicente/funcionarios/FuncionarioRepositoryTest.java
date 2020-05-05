@@ -44,7 +44,7 @@ public class FuncionarioRepositoryTest{
 	//@Autowired(required=true)
 	private FuncionarioRepository funcionarioRepository;
 	
-	Funcionario funcionario = new Funcionario("Roberio Felismino Brito", "Médico", new BigDecimal(70000.00));
+	Funcionario funcionario = new Funcionario("Roberio Felismino Brito", "Médico", true, new BigDecimal(70000.00));
 	
 	@Test
 	public void testeTrueFindByName() throws Exception {

@@ -6,6 +6,6 @@ import com.vicente.cadastro.model.Funcionario;
 
 public interface FuncionarioRepository extends JpaRepository<Funcionario, Long> {
 
-	Optional<Funcionario> findByNome(String nome_funcionario);
+	Optional<Funcionario> findByNome(String nome);
 	
 }

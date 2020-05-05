@@ -1,6 +1,5 @@
 package com.vicente.cadastro.controller;
 
-import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 
@@ -9,6 +8,7 @@ import javax.validation.Valid;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -19,10 +19,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import com.vicente.cadastro.event.RecursoCriadoEvent;
 import com.vicente.cadastro.model.Funcionario;
 import com.vicente.cadastro.repository.FuncionarioRepository;
 
@@ -33,6 +34,9 @@ public class FuncionarioController {
 	
 	@Autowired
 	private FuncionarioRepository funcionarios;
+	
+	@Autowired
+	private ApplicationEventPublisher publisher;
 	
 	@GetMapping
 	public List<Funcionario> listar() {
@@ -65,10 +69,9 @@ public class FuncionarioController {
 		
 		//Adicionando no retorno o path juntamente com o id 
 		Funcionario funcSalvo = funcionarios.save(funcionario);
-		URI uri = ServletUriComponentsBuilder.fromCurrentRequestUri().path("/{id}")
-				.buildAndExpand(funcSalvo.getId()).toUri();
-				
-		return ResponseEntity.created(uri).body(funcSalvo);
+		
+		publisher.publishEvent(new RecursoCriadoEvent(this, response, funcSalvo.getId()));
+		return ResponseEntity.status(HttpStatus.CREATED).body(funcSalvo);
 		
 	} // adicionar
 	
@@ -87,20 +90,15 @@ public class FuncionarioController {
 		funcionarios.save(existente.get());
 		
 		return ResponseEntity.ok(funcionario);
-	}
-	
+		
+	} //atualizar
+
 	@DeleteMapping("/{id}")
-	public ResponseEntity<Void> remover(@PathVariable Long id) {
+	@ResponseStatus(HttpStatus.NO_CONTENT)
+	public void remover(@PathVariable Long id) {
 		
-		Optional<Funcionario> funcionario = funcionarios.findById(id);
+		this.funcionarios.deleteById(id);
 		
-		if (!funcionario.isPresent()) {
-			return ResponseEntity.notFound().build();
-		}
-		
-		funcionarios.delete(funcionario.get());
-		
-		return ResponseEntity.noContent().build();
-	}
+	} // remover
 
 } // FuncionarioController

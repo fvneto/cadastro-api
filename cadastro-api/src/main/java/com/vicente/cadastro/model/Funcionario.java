@@ -1,28 +1,31 @@
 package com.vicente.cadastro.model;
 
 import java.math.BigDecimal;
-
 import javax.persistence.Column;
+import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Table;
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-import org.springframework.lang.NonNull;
-
 @Entity
+@Table(name = "funcionario")
 public class Funcionario {
 	
 	public Funcionario() {}
 	
 	public Funcionario(Long id, @NotEmpty @Size(max = 80) String nome,
-			@NotEmpty @Size(max = 80) String funcao, BigDecimal salario) {
+			@NotEmpty @Size(max = 80) String funcao,  @NotNull Boolean ativo, BigDecimal salario) {
+		
 		super();
 		this.id = id;
 		this.nome = nome;
 		this.funcao = funcao;
+		this.ativo= ativo;
 		this.salario = salario;
 	}
 	
@@ -30,25 +33,33 @@ public class Funcionario {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	
-	@NonNull
+	@NotNull
 	@NotEmpty
 	@Size(max = 80)
-	@Column(name = "nome_funcionario")
+	@Column(name = "nome")
 	private String nome;
 	
+	@Embedded
+	private Endereco endereco;
+	
 	@NotEmpty
 	@Size(max = 80)
-	@Column(name = "funcao_funcionario")
+	@Column(name = "funcao")
 	private String funcao; 
 	
-	@Column(name = "salario_funcionario")
+	@Column(name = "salario")
 	private BigDecimal salario;
 	
-	public Funcionario(@NotEmpty @Size(max = 80) String nome, @NotEmpty @Size(max = 80) String funcao,
-			 BigDecimal salario) {
+	@NotNull
+	private Boolean ativo;
+	
+	public Funcionario(@NotEmpty @Size(max = 80) String nome, 
+			@NotEmpty @Size(max = 80) String funcao, @NotNull Boolean ativo,
+			BigDecimal salario) {
 		super();
 		this.nome = nome;
 		this.funcao = funcao;
+		this.ativo = ativo;
 		this.salario = salario;
 	}
 	
@@ -61,21 +72,43 @@ public class Funcionario {
 	public String getNome() {
 		return nome;
 	}
+	
+	public Endereco getEndereco() {
+		return endereco;
+	}
+
+	public void setEndereco(Endereco endereco) {
+		this.endereco = endereco;
+	}
+	
 	public void setNome(String nome) {
 		this.nome = nome;
 	}
+	
 	public String getFuncao() {
 		return funcao;
 	}
+	
 	public void setFuncao(String funcao) {
 		this.funcao = funcao;
 	}
+	
 	public BigDecimal getSalario() {
 		return salario;
 	}
+	
 	public void setSalario(BigDecimal salario) {
 		this.salario = salario;
 	}
+	
+	public Boolean getAtivo() {
+		return ativo;
+	}
+
+	public void setAtivo(Boolean ativo) {
+		this.ativo = ativo;
+	}
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;
