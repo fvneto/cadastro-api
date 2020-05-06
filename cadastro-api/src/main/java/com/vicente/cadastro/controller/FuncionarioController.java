@@ -6,7 +6,6 @@ import java.util.Optional;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
@@ -22,10 +21,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
-
 import com.vicente.cadastro.event.RecursoCriadoEvent;
 import com.vicente.cadastro.model.Funcionario;
 import com.vicente.cadastro.repository.FuncionarioRepository;
+import com.vicente.cadastro.service.FuncionarioService;
 
 @CrossOrigin
 @RestController
@@ -36,12 +35,17 @@ public class FuncionarioController {
 	private FuncionarioRepository funcionarios;
 	
 	@Autowired
+	private FuncionarioService funcionarioService;
+	
+	@Autowired
 	private ApplicationEventPublisher publisher;
 	
 	@GetMapping
 	public List<Funcionario> listar() {
+		
 		return funcionarios.findAll();
-	}
+		
+	} // listar();
 
 	@GetMapping("/{id}")
 	public ResponseEntity<Funcionario> buscar(@PathVariable Long id) {
@@ -50,7 +54,7 @@ public class FuncionarioController {
 	      .map(funcionario -> ResponseEntity.ok(funcionario))
 	      .orElse(ResponseEntity.notFound().build());
 			
-	} // buscar
+	} // buscar()
 	
 	@PostMapping
 	public ResponseEntity<Funcionario> adicionar(@Valid @RequestBody Funcionario funcionario,
@@ -73,25 +77,16 @@ public class FuncionarioController {
 		publisher.publishEvent(new RecursoCriadoEvent(this, response, funcSalvo.getId()));
 		return ResponseEntity.status(HttpStatus.CREATED).body(funcSalvo);
 		
-	} // adicionar
+	} // adicionar()
 	
 	@PutMapping("/{id}")
 	public ResponseEntity<Funcionario> atualizar(@PathVariable Long id, 
 			@Valid @RequestBody Funcionario funcionario) {
 		
-		Optional<Funcionario> existente = funcionarios.findById(id);
+		Funcionario funcionarioSalva = funcionarioService.atualizar(id, funcionario);
+		return ResponseEntity.ok(funcionarioSalva);
 		
-		if (existente.isPresent()) {
-			return ResponseEntity.notFound().build();
-		}
-		
-		BeanUtils.copyProperties(funcionario, existente.get(), "id");
-		
-		funcionarios.save(existente.get());
-		
-		return ResponseEntity.ok(funcionario);
-		
-	} //atualizar
+	} // atualizar
 
 	@DeleteMapping("/{id}")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
